@@ -1,4 +1,4 @@
-import "json"
+use "json"
 
 let data_string = '{"name": "GlowLang", "fast": true}'
 let parsed = json.parse(data_string)

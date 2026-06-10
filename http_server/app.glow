@@ -1,4 +1,4 @@
-import "http"
+use "http"
 
 blueprint App:
     action init():

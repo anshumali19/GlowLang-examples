@@ -1,4 +1,4 @@
-import "database"
+use "database"
 
 let db = database.connect("users.db")
 db.execute("CREATE TABLE users (id INTEGER, name TEXT)")
