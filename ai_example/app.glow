@@ -1,0 +1,11 @@
+import "ai"
+
+# Create two tensors
+let t1 = ai.Tensor([1.0, 2.0, 3.0, 4.0], shape=[2, 2])
+let t2 = ai.Tensor([2.0, 0.0, 0.0, 2.0], shape=[2, 2])
+
+# Perform SIMD accelerated matrix multiplication
+let result = t1.matmul(t2)
+
+show "Matrix Multiplication Result:"
+show result

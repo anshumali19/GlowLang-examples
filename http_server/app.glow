@@ -1,0 +1,15 @@
+import "http"
+
+blueprint App:
+    action init():
+        self.server = http.Server()
+    end
+
+    action start():
+        show "Starting server on port 8080..."
+        self.server.listen(8080)
+    end
+end
+
+let my_app = App()
+my_app.start()

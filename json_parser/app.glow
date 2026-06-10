@@ -1,0 +1,9 @@
+import "json"
+
+let data_string = '{"name": "GlowLang", "fast": true}'
+let parsed = json.parse(data_string)
+
+show "Parsed Data:"
+when "name" is in parsed:
+    show parsed["name"]
+end
