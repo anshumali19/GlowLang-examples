@@ -1,0 +1,5 @@
+# Packages installed by gdu, and files the examples create
+.glow_pkg/
+Glow.deps
+Glow.lock
+*.db

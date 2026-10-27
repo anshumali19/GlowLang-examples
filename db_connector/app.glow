@@ -1,7 +1,26 @@
+# Database Connector Example
+# Uses the `database` package (a thin wrapper over the built-in SQLite module).
+#
+# Setup:  gdu install database
+# Run:    glowlang run app.glow
+
 use "database"
 
-let db = database.connect("users.db")
-db.execute("CREATE TABLE users (id INTEGER, name TEXT)")
-db.execute("INSERT INTO users VALUES (1, 'Alice')")
+let db = Database("users.db")
+db.execute("DROP TABLE IF EXISTS users")
+db.create_table("users", {"name": "TEXT", "age": "INTEGER"})
 
-show "Inserted Alice into database."
+db.execute("INSERT INTO users (name, age) VALUES ('Alice', 30)")
+db.execute("INSERT INTO users (name, age) VALUES ('Bob', 25)")
+db.execute("INSERT INTO users (name, age) VALUES ('Charlie', 35)")
+show "Inserted 3 users."
+
+for each row in db.query("SELECT name, age FROM users ORDER BY age"):
+    show f"  {row['name']} is {row['age']}"
+end
+
+let older = db.query("SELECT COUNT(*) AS n FROM users WHERE age > 28")
+show "Users older than 28:", older[0]["n"]
+
+db.close()
+fs.remove("users.db")

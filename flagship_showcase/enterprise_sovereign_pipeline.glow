@@ -1,41 +1,50 @@
-# GlowLang Flagship Enterprise Showcase
-# Demonstrates 5 Built-in C/SIMD Hardware Acceleration Subsystems
-# Run with: glowlang run enterprise_sovereign_pipeline.glow
+# GlowLang Native Modules Showcase
+# Five natives implemented in C inside the runtime, used together in one
+# small pipeline: JSON, BLAKE3, INT4 weights, socket polling and PNG headers.
+#
+# Run:  glowlang run enterprise_sovereign_pipeline.glow
 
-use "kavach.glow"
-use "prism.glow"
-use "veda.glow"
 use "tensor_utils.glow"
 
-show "=== GlowLang Flagship Hardware Acceleration Pipeline ==="
+show "=== GlowLang Native Modules Pipeline ==="
 
-# 1. Zero-Copy Transaction Parsing (simd_json / Prism)
-let raw_stream = "{\"txn\": \"SOV-8821\", \"amount\": 1000000}"
-let parsed = json.scan_fast(raw_stream)
-show "[1] Scanned Payload Key: ", parsed["key"], " -> Value: ", parsed["val"]
+# 1. Parse a transaction (json.parse builds dicts and lists).
+let raw = '{"txn": "SOV-8821", "amount": 1000000}'
+let txn = json.parse(raw)
+show f"[1] Transaction {txn['txn']} for {txn['amount']}"
 
-# 2. Tamper-Proof Cryptographic Sealing (crypto_fast / Kavach)
-let seal = crypto.blake3(parsed["val"])
-show "[2] BLAKE3 Hardware Seal: ", seal
+# json.scan_fast is a lighter helper: it returns only the first key and the
+# raw text of its value, without parsing the rest.
+let first = json.scan_fast(raw)
+show f"    First field: {first['key']} = {first['val']}"
 
-# 3. Quantized INT4 AI Risk Evaluation (llm / Veda)
-let int4_weights = tensor.zeros(4)
-int4_weights[0] = 163.0; int4_weights[1] = 127.0
-let fp_tensor = tensor.dequantize_int4(int4_weights)
-let risk_score = tensor_sum(fp_tensor, len(fp_tensor))
-show "[3] INT4 Dequantized Risk Audit Score: ", risk_score
+# 2. Seal it with a BLAKE3 hash (256-bit, 64 hex digits).
+let seal = crypto.blake3(json.stringify(txn))
+show "[2] BLAKE3 seal:", seal
 
-# 4. Asynchronous Socket Stream Check (io_uring)
-let is_ready = net_fast.poll_fast()
-show "[4] High-Concurrency Epoll Ready: ", is_ready
+# 3. INT4 weights: each element holds one byte packing two 4-bit weights.
+let packed = tensor.zeros(2)
+tensor.set(packed, 0, 163)
+tensor.set(packed, 1, 127)
+let weights = tensor.dequantize_int4(packed)
+show "[3] Dequantized weights:", weights, "sum:", tensor_sum(weights, len(weights))
 
-# 5. SIMD Security Camera Header Verification (media SIMD)
-let cam_header = tensor.zeros(24)
-cam_header[0] = 137.0; cam_header[1] = 80.0; cam_header[2] = 78.0; cam_header[3] = 71.0 # PNG
-cam_header[18] = 7.0; cam_header[19] = 128.0 # Width 1920
-cam_header[22] = 4.0; cam_header[23] = 56.0  # Height 1080
+# 4. Check a listening socket for waiting connections (select-based).
+let server = http.listen(0)
+show "[4] Connection waiting:", net_fast.poll_fast(server, 10)
+http.close(server)
 
-let res_meta = media.png_dims(cam_header)
-show "[5] Camera Frame Resolution: ", res_meta["width"], "x", res_meta["height"]
+# 5. Read the size of a PNG image from its first 24 header bytes.
+let header = tensor.zeros(24)
+let png_signature = [137, 80, 78, 71, 13, 10, 26, 10]
+for each i, byte in png_signature:
+    tensor.set(header, i, byte)
+end
+tensor.set(header, 18, 7)     # width  = 7 * 256 + 128 = 1920
+tensor.set(header, 19, 128)
+tensor.set(header, 22, 4)     # height = 4 * 256 + 56 = 1080
+tensor.set(header, 23, 56)
+let size = media.png_dims(header)
+show f"[5] Image size: {size['width']} x {size['height']}"
 
-show "\n🎉 Enterprise Sovereign Pipeline Executed Successfully!"
+show "Pipeline complete."

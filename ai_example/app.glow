@@ -1,11 +1,23 @@
+# AI Example
+# Matrix multiplication with the built-in SIMD `tensor` module, then a small
+# neural network from the `ai` package.
+#
+# Setup:  gdu install ai
+# Run:    glowlang run app.glow
+
 use "ai"
 
-# Create two tensors
-let t1 = ai.Tensor([1.0, 2.0, 3.0, 4.0], shape=[2, 2])
-let t2 = ai.Tensor([2.0, 0.0, 0.0, 2.0], shape=[2, 2])
+# 1. Two 2x2 matrices, stored row by row.
+let a = list_to_tensor([1.0, 2.0, 3.0, 4.0])
+let b = list_to_tensor([2.0, 0.0, 0.0, 2.0])
 
-# Perform SIMD accelerated matrix multiplication
-let result = t1.matmul(t2)
+# tensor.matmul(A, rows_A, cols_A, B, rows_B, cols_B)
+let product = tensor.matmul(a, 2, 2, b, 2, 2)
+show "Matrix product:", tensor_to_list(product, 4)
+show "Shape:", tensor.shape(product)
 
-show "Matrix Multiplication Result:"
-show result
+# 2. A network with 3 inputs, a hidden layer of 4 and 1 output.
+let net = NeuralNet([3, 4, 1])
+net.set_layer_activation(1, "sigmoid")
+let output = net.predict(list_to_tensor([0.5, 0.2, 0.9]))
+show "Network output:", tensor_to_list(output, 1)

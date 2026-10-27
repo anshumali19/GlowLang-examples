@@ -1,9 +1,26 @@
+# JSON Example
+# Parsing and producing JSON with the built-in `json` module, plus path
+# queries and pretty-printing from the `json` package.
+#
+# Setup:  gdu install json
+# Run:    glowlang run app.glow
+
 use "json"
 
-let data_string = '{"name": "GlowLang", "fast": true}'
-let parsed = json.parse(data_string)
+let text = '{"name": "GlowLang", "fast": true, "tags": ["natural", "jit"], "owner": {"country": "India"}}'
+let data = json.parse(text)
 
-show "Parsed Data:"
-when "name" is in parsed:
-    show parsed["name"]
+show "Name:", data["name"]
+when "tags" is in data:
+    show "Tags:", ", ".join(data["tags"])
 end
+
+# Path queries from the json package.
+let doc = jpath(data)
+show "Country:", doc.get("owner.country")
+
+# Build a value and turn it back into JSON.
+data["version"] = 2
+show "As JSON:", json.stringify(data)
+show "Pretty:"
+show json_pretty(data)

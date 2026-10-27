@@ -1,15 +1,63 @@
-use "http"
+# HTTP Server Example
+# A small web server built on GlowLang's built-in `http` module, organised
+# with a `blueprint`. Open http://localhost:8080/ and /hello in a browser.
+#
+# Run:  glowlang run app.glow        (Ctrl+C to stop)
 
 blueprint App:
-    action init():
-        self.server = http.Server()
+    action init(port):
+        self.port = port
+        self.routes = {}
+        self.served = 0
+    end
+
+    # Register a handler: a function that takes the request path and
+    # returns the response body.
+    action route(path, handler):
+        self.routes[path] = handler
+        return self
+    end
+
+    action respond(client, status, body):
+        let head = "HTTP/1.1 " + status + "\r\nContent-Type: text/plain\r\nContent-Length: " + len(body) + "\r\nConnection: close\r\n\r\n"
+        http.send(client, head + body)
+        http.close(client)
+    end
+
+    # The path from the request line, e.g. "GET /hello HTTP/1.1" -> "/hello".
+    action path_of(request):
+        let first_line = request.split("\r\n")[0]
+        let parts = first_line.split(" ")
+        if len(parts) < 2:
+            return "/"
+        end
+        return parts[1]
     end
 
     action start():
-        show "Starting server on port 8080..."
-        self.server.listen(8080)
+        let server = http.listen(self.port)
+        show f"Server listening on http://localhost:{self.port}"
+        while true:
+            let client = http.accept(server)
+            let request = http.read(client)
+            if request is none:
+                http.close(client)
+                skip
+            end
+            let path = self.path_of(request)
+            let handler = self.routes.get(path)
+            if handler is none:
+                self.respond(client, "404 Not Found", "No route for " + path)
+            else:
+                self.respond(client, "200 OK", handler(path))
+            end
+            self.served = self.served + 1
+            show f"[{self.served}] {path}"
+        end
     end
 end
 
-let my_app = App()
-my_app.start()
+let app = App(8080)
+app.route("/", lambda(path): "Welcome to GlowLang!")
+app.route("/hello", lambda(path): "Hello from a GlowLang blueprint")
+app.start()

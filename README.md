@@ -1,42 +1,43 @@
 # GlowLang Examples
 
-A curated list of official and community examples demonstrating how to build robust applications and packages in GlowLang.
+Small, complete programs that show how to build things with
+[GlowLang](https://github.com/anshumali19/GlowLang-core). Every example here runs with the
+current GlowLang release built from GlowLang-core.
 
-*   [HTTP Server Example](./http_server)
-*   [JSON Parser](./json_parser)
-*   [Database Connector](./db_connector)
-*   [AI / Neural Network Example](./ai_example)
+| Example | What it shows | Needs |
+|---------|---------------|-------|
+| [`http_server`](http_server) | A web server with routes, using the built-in `http` module and a `blueprint` | — |
+| [`json_parser`](json_parser) | `json.parse` / `json.stringify`, path queries and pretty-printing | `gdu install json` |
+| [`db_connector`](db_connector) | Creating, filling and querying a SQLite database | `gdu install database` |
+| [`ai_example`](ai_example) | SIMD matrix multiplication and a small neural network | `gdu install ai` |
+| [`ai_example/csv_ai_training.glow`](ai_example/csv_ai_training.glow) | Training a linear model on a CSV file with the bundled `dataframe` and `glowtorch` libraries | — |
+| [`flagship_showcase`](flagship_showcase) | Native modules together: JSON, BLAKE3, INT4 weights, socket polling, PNG headers | — |
 
----
-
-## ⚡ Fast Installation via `gdu` (Glow Dependency Utility)
-To run these examples, you need the GlowLang interpreter installed. The fastest way to install it is using `gdu`:
-
-### 1. Download `gdu`
-Download the pre-compiled `gdu` binary for your platform from the **[GitHub Releases Page](https://github.com/anshumali19/GlowLang-packages/releases)**.
-
-### 2. Run the Installer
-Run the following command in your terminal to download, compile, and add the `glowlang` toolchain to your system PATH automatically:
+## Running an example
 
 ```bash
-# On Linux/macOS
-gdu install glowlang
-
-# On Windows
-gdu.exe install glowlang
+cd json_parser
+gdu install json            # only for examples that need a package
+glowlang run app.glow
 ```
 
-### 3. Bootstrap from Source (Alternative)
-If you do not have a pre-compiled `gdu` binary, you can compile and run `gdu` manually to bootstrap the installation:
+`gdu install` puts the package in `.glow_pkg/` inside the example folder, where `use "json"`
+finds it.
 
-```bash
-# Clone the packages repository
-git clone https://github.com/anshumali19/GlowLang-packages.git
-cd GlowLang-packages/gdu
+## Installing GlowLang
 
-# Compile gdu
-gcc gdu.c -o gdu -O2 -lsqlite3
+* **Pre-built:** download an archive from the
+  [Releases page](https://github.com/anshumali19/GlowLang-packages/releases), or run
+  `gdu install glowlang`. Releases can lag behind the source.
+* **From source** (newest): clone [GlowLang-core](https://github.com/anshumali19/GlowLang-core)
+  and run `make` (Linux/macOS) or `.\build.bat` (Windows). The examples that use bundled
+  libraries (`dataframe`, `glowtorch`, `tensor_utils`) need the `lib/` folder that comes with
+  GlowLang next to the `glowlang` binary.
 
-# Install the toolchain
-./gdu install glowlang
-```
+To build only `gdu`: `cd gdu && gcc gdu.c -o gdu -O2 -lsqlite3 -lcrypto`.
+
+## Contributing
+
+New examples are welcome: keep them small, make sure they run with the current build, and
+describe only what the code really does. See
+[CONTRIBUTING.md in GlowLang-core](https://github.com/anshumali19/GlowLang-core/blob/main/CONTRIBUTING.md).
